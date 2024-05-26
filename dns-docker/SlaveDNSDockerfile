@@ -1,0 +1,10 @@
+# Verwende das offizielle BIND9-Image als Basis
+FROM ubuntu/bind9
+
+# Kopiere die Zonendatei und die named.conf.slave
+COPY db.slave.mis /etc/bind/db.slave.mis
+COPY named.conf.slave /etc/bind/named.conf.slave
+
+# Starte named im Vordergrund
+CMD ["named", "-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
+

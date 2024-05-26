@@ -1,0 +1,69 @@
+version: '3'
+services:
+  dns-server:
+    build:
+      context: .
+      dockerfile: DNSDockerfile
+    container_name: dns-server
+    networks:
+      vdnsnet:
+        ipv4_address: 192.168.0.10
+
+  dns-slave:
+    build:
+      context: .
+      dockerfile: SlaveDNSDockerfile
+    container_name: dns-slave
+    networks:
+      vdnsnet:
+        ipv4_address: 192.168.0.11
+
+  dns-client:
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: ClientDockerfile
+    container_name: dns-client
+    networks:
+      vdnsnet:
+        ipv4_address: 192.168.0.20
+    depends_on:
+      - dns-server
+
+  email-server:
+    build:
+      context: .
+      dockerfile: EmailServerDockerfile
+    container_name: email-server
+    hostname: mail
+    domainname: mis.lan
+    environment:
+      - MAIL_SERVER_DOMAIN=mail.mis.lan
+    volumes:
+      - maildata:/var/mail
+      - mailstate:/var/mail-state
+      - maillogs:/var/log/mail
+      - ./config/:/tmp/docker-mailserver/
+    ports:
+      - "25:25"
+      - "143:143"
+      - "587:587"
+      - "993:993"
+    networks:
+      vdnsnet:
+        ipv4_address: 192.168.0.25
+    depends_on:
+      - dns-server
+
+networks:
+  vdnsnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+
+volumes:
+  maildata:
+  mailstate:
+  maillogs:

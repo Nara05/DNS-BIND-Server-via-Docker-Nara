@@ -1,0 +1,12 @@
+options {
+    directory "/etc/bind";
+    allow-query { any; };
+    listen-on { any; };
+    listen-on-v6 { none; };
+};
+
+zone "mis.lan" {
+    type slave;
+    file "/etc/bind/db.slave.mis";
+    masters { 192.168.0.10; };
+};

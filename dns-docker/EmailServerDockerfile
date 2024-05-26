@@ -1,0 +1,22 @@
+# Verwende das offizielle Ubuntu-Image als Basis
+FROM ubuntu:20.04
+
+# Installiere net-tools für netstat, postfix als Mail-Server und rsyslog für das Logging
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y net-tools postfix rsyslog
+
+# Setze Umgebungsvariablen für Postfix
+ENV MAILNAME=meinemailserver.com
+
+# Kopiere zusätzliche Konfigurationsdateien, wenn vorhanden
+# COPY main.cf /etc/postfix/main.cf
+
+# Start-Skript für postfix und rsyslog
+COPY start-mailserver.sh /usr/local/bin/start-mailserver.sh
+RUN chmod +x /usr/local/bin/start-mailserver.sh
+
+# Exponiere die relevanten Ports für den Mail-Server
+EXPOSE 25 143 587 993
+
+# Starte postfix und rsyslog im Vordergrund
+CMD ["start-mailserver.sh"]
